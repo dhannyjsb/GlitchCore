@@ -4,35 +4,36 @@
  ******************************************************************************/
 package glitchcore.fabric.network;
 
-import glitchcore.core.GlitchCore;
 import glitchcore.network.CustomPacket;
 import net.fabricmc.fabric.api.networking.v1.*;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.PacketType;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.server.network.ServerConfigurationPacketListenerImpl;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Optional;
 
-public class FabricPacketWrapper<T extends CustomPacket<T>>
+public class CustomPacketPayloadWrapper<T extends CustomPacket<T>>
 {
     protected final ResourceLocation channel;
     protected final CustomPacket<T> packet;
-    protected final PacketType<?> fabricPacketType;
+    protected final CustomPacketPayload.Type<Impl> payloadType;
 
-    public FabricPacketWrapper(ResourceLocation channel, CustomPacket<T> packet)
+    public CustomPacketPayloadWrapper(ResourceLocation channel, CustomPacket<T> packet)
     {
         this.channel = channel;
         this.packet = packet;
-        this.fabricPacketType = PacketType.create(this.channel, Impl::new);
+        this.payloadType = CustomPacketPayload.createType(channel.toString());
 
         if (packet.getPhase() == CustomPacket.Phase.PLAY)
         {
-            ServerPlayNetworking.registerGlobalReceiver(this.fabricPacketType, new ServerPlayNetworking.PlayPacketHandler() {
+            PayloadTypeRegistry.playC2S().register(this.payloadType, CustomPacketPayload.codec(Impl::write, Impl::new));
+            ServerPlayNetworking.registerGlobalReceiver(this.payloadType, new ServerPlayNetworking.PlayPayloadHandler() {
                 @Override
-                public void receive(FabricPacket packet, ServerPlayer player, PacketSender responseSender) {
-                    FabricPacketWrapper.this.packet.handle(((Impl) packet).data, new CustomPacket.Context() {
+                public void receive(CustomPacketPayload payload, ServerPlayNetworking.Context context)
+                {
+                    CustomPacketPayloadWrapper.this.packet.handle(((Impl) packet).data, new CustomPacket.Context() {
                         @Override
                         public boolean isClientSide() {
                             return false;
@@ -40,7 +41,7 @@ public class FabricPacketWrapper<T extends CustomPacket<T>>
 
                         @Override
                         public Optional<Player> getPlayer() {
-                            return Optional.of(player);
+                            return Optional.of(context.player());
                         }
                     });
                 }
@@ -48,12 +49,13 @@ public class FabricPacketWrapper<T extends CustomPacket<T>>
         }
         else if (packet.getPhase() == CustomPacket.Phase.CONFIGURATION)
         {
-            ServerConfigurationNetworking.registerGlobalReceiver(this.fabricPacketType, new ServerConfigurationNetworking.ConfigurationPacketHandler()
+            PayloadTypeRegistry.configurationC2S().register(this.payloadType, CustomPacketPayload.codec(Impl::write, Impl::new));
+            ServerConfigurationNetworking.registerGlobalReceiver(this.payloadType, new ServerConfigurationNetworking.ConfigurationPacketHandler()
             {
                 @Override
-                public void receive(FabricPacket packet, ServerConfigurationPacketListenerImpl networkHandler, PacketSender responseSender)
+                public void receive(CustomPacketPayload payload, ServerConfigurationNetworking.Context context)
                 {
-                    FabricPacketWrapper.this.packet.handle(((Impl)packet).data, new CustomPacket.Context()
+                    CustomPacketPayloadWrapper.this.packet.handle(((Impl)packet).data, new CustomPacket.Context()
                     {
                         @Override
                         public boolean isClientSide()
@@ -72,12 +74,12 @@ public class FabricPacketWrapper<T extends CustomPacket<T>>
         }
     }
 
-    public FabricPacket createPacket(T data)
+    public CustomPacketPayload createPacket(T data)
     {
         return new Impl(data);
     }
 
-    class Impl implements FabricPacket
+    protected class Impl implements CustomPacketPayload
     {
         protected final T data;
 
@@ -86,21 +88,19 @@ public class FabricPacketWrapper<T extends CustomPacket<T>>
             this.data = data;
         }
 
-        private Impl(FriendlyByteBuf buf)
+        Impl(FriendlyByteBuf buf)
         {
-            this.data = FabricPacketWrapper.this.packet.decode(buf);
+            this.data = CustomPacketPayloadWrapper.this.packet.decode(buf);
         }
 
-        @Override
         public void write(FriendlyByteBuf buf)
         {
             this.data.encode(buf);
         }
 
         @Override
-        public PacketType<?> getType()
-        {
-            return FabricPacketWrapper.this.fabricPacketType;
+        public Type<? extends CustomPacketPayload> type() {
+            return CustomPacketPayloadWrapper.this.payloadType;
         }
     }
 }

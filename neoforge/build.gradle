@@ -6,11 +6,6 @@ plugins {
 
 base.archivesName.set("${mod_name}-neoforge")
 
-mixin {
-    config "${mod_id}.mixins.json"
-    config "${mod_id}.neoforge.mixins.json"
-}
-
 minecraft {
     mappings {
         channel = official()

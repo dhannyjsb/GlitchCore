@@ -31,7 +31,7 @@ public class GlitchCoreFabricClient implements ClientModInitializer
     public void onInitializeClient()
     {
         // GlitchCore initialization
-        ItemTooltipCallback.EVENT.register((stack, context, lines) -> {
+        ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
             EventManager.fire(new ItemTooltipEvent(stack, lines));
         });
 

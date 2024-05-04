@@ -30,7 +30,7 @@
     "fabricloader": "*",
     "fabric": "*",
     "minecraft": "${minecraft_version}",
-    "java": ">=17"
+    "java": ">=21"
   },
   "accessWidener": "${mod_id}.accesswidener",
   "custom": {

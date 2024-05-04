@@ -11,8 +11,7 @@
     "impl.MixinRenderHelper"
   ],
   "client": [
-    "client.MixinGuiGraphics",
-    "client.MixinVanillaGuiOverlay"
+    "client.MixinGuiGraphics"
   ],
   "injectors": {
     "defaultRequire": 1

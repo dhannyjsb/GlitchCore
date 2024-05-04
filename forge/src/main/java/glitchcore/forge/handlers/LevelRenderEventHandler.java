@@ -27,6 +27,7 @@ public class LevelRenderEventHandler
 
     private static void fireStage(LevelRenderEvent.Stage stage, RenderLevelStageEvent event)
     {
-        EventManager.fire(new LevelRenderEvent(stage, event.getLevelRenderer(), event.getPoseStack(), event.getProjectionMatrix(), event.getRenderTick(), event.getPartialTick(), event.getCamera(), event.getFrustum()));
+        // TODO: Use mixins to get the posestack
+        // EventManager.fire(new LevelRenderEvent(stage, event.getLevelRenderer(), event.getPoseStack(), event.getProjectionMatrix(), event.getRenderTick(), event.getPartialTick(), event.getCamera(), event.getFrustum()));
     }
 }

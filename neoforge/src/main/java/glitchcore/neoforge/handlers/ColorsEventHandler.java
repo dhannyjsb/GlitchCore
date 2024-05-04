@@ -4,15 +4,14 @@
  ******************************************************************************/
 package glitchcore.neoforge.handlers;
 
-import glitchcore.core.GlitchCore;
 import glitchcore.event.EventManager;
 import glitchcore.event.client.RegisterColorsEvent;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.client.event.RegisterColorHandlersEvent;
 
-@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+@EventBusSubscriber(bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ColorsEventHandler
 {
     @SubscribeEvent

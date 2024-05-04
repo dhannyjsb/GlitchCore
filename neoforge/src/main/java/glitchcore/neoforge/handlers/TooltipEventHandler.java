@@ -6,10 +6,10 @@ package glitchcore.neoforge.handlers;
 
 import glitchcore.event.EventManager;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.common.Mod;
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.event.entity.player.ItemTooltipEvent;
 
-@Mod.EventBusSubscriber
+@EventBusSubscriber
 public class TooltipEventHandler
 {
     @SubscribeEvent

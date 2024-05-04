@@ -4,14 +4,14 @@
  ******************************************************************************/
 package glitchcore.fabric.mixin.impl;
 
-import glitchcore.fabric.network.FabricPacketWrapper;
-import glitchcore.fabric.network.IFabricPacketHandler;
+import glitchcore.fabric.network.CustomPacketPayloadWrapper;
+import glitchcore.fabric.network.ICustomPayloadPacketHandler;
 import glitchcore.network.CustomPacket;
 import glitchcore.network.PacketHandler;
-import net.fabricmc.fabric.api.networking.v1.FabricPacket;
 import net.fabricmc.fabric.api.networking.v1.ServerConfigurationNetworking;
 import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 import net.jodah.typetools.TypeResolver;
+import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
@@ -23,14 +23,14 @@ import java.util.Map;
 
 // Priority = 0 to facilitate overriding
 @Mixin(value = PacketHandler.class, remap = false, priority = 0)
-public abstract class MixinPacketHandler implements IFabricPacketHandler
+public abstract class MixinPacketHandler implements ICustomPayloadPacketHandler
 {
     @Shadow
     @Final
     private ResourceLocation channelName;
 
     @Unique
-    private Map<Class<?>, FabricPacketWrapper> wrappers = new HashMap<>();
+    private Map<Class<?>, CustomPacketPayloadWrapper> wrappers = new HashMap<>();
 
 
     @Overwrite
@@ -42,10 +42,10 @@ public abstract class MixinPacketHandler implements IFabricPacketHandler
     @Overwrite
     public <T extends CustomPacket<T>> void sendToPlayer(T packet, ServerPlayer player)
     {
-        FabricPacket fPacket = createFabricPacket((CustomPacket)packet);
+        CustomPacketPayload payload = createCustomPacketPayload((CustomPacket)packet);
         switch (packet.getPhase())
         {
-            case PLAY -> ServerPlayNetworking.send(player, fPacket);
+            case PLAY -> ServerPlayNetworking.send(player, payload);
             default -> throw new UnsupportedOperationException("Attempted to send packet with unsupported phase " + packet.getPhase());
         }
     }
@@ -53,10 +53,10 @@ public abstract class MixinPacketHandler implements IFabricPacketHandler
     @Overwrite
     public <T extends CustomPacket<T>> void sendToAll(T packet, MinecraftServer server)
     {
-        FabricPacket fPacket = createFabricPacket((CustomPacket)packet);
+        CustomPacketPayload payload = createCustomPacketPayload((CustomPacket)packet);
         switch (packet.getPhase())
         {
-            case PLAY -> server.getPlayerList().broadcastAll(ServerPlayNetworking.createS2CPacket(fPacket));
+            case PLAY -> server.getPlayerList().broadcastAll(ServerPlayNetworking.createS2CPacket(payload));
             default -> throw new UnsupportedOperationException("Attempted to send packet with unsupported phase " + packet.getPhase());
         }
     }
@@ -64,10 +64,10 @@ public abstract class MixinPacketHandler implements IFabricPacketHandler
     @Overwrite
     public <T extends CustomPacket<T>> void sendToHandler(T packet, ServerConfigurationPacketListenerImpl handler)
     {
-        FabricPacket fPacket = createFabricPacket((CustomPacket)packet);
+        CustomPacketPayload payload = createCustomPacketPayload((CustomPacket)packet);
         switch (packet.getPhase())
         {
-            case CONFIGURATION -> ServerConfigurationNetworking.send(handler, fPacket);
+            case CONFIGURATION -> ServerConfigurationNetworking.send(handler, payload);
             default -> throw new UnsupportedOperationException("Attempted to send packet with unsupported phase " + packet.getPhase());
         }
     }
@@ -84,7 +84,7 @@ public abstract class MixinPacketHandler implements IFabricPacketHandler
     }
 
     @Override
-    public <T extends CustomPacket<T>> FabricPacket createFabricPacket(T packet)
+    public <T extends CustomPacket<T>> CustomPacketPayload createCustomPacketPayload(T packet)
     {
         var dataType = getPacketDataType(packet);
 
