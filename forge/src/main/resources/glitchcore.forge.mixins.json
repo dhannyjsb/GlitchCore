@@ -11,7 +11,8 @@
     "impl.MixinRenderHelper"
   ],
   "client": [
-    "client.MixinGuiGraphics"
+    "client.MixinGuiGraphics",
+    "client.MixinModelLayers"
   ],
   "injectors": {
     "defaultRequire": 1
