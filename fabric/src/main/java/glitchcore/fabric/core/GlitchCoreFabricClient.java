@@ -18,6 +18,7 @@ import net.fabricmc.fabric.api.client.rendering.v1.ColorProviderRegistry;
 import net.fabricmc.fabric.api.client.rendering.v1.WorldRenderEvents;
 import net.fabricmc.fabric.api.event.player.UseBlockCallback;
 import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleEngine;
 import net.minecraft.client.particle.ParticleProvider;
 import net.minecraft.core.particles.ParticleType;
@@ -32,7 +33,8 @@ public class GlitchCoreFabricClient implements ClientModInitializer
     {
         // GlitchCore initialization
         ItemTooltipCallback.EVENT.register((stack, context, type, lines) -> {
-            EventManager.fire(new ItemTooltipEvent(stack, lines));
+            var player = Minecraft.getInstance().player;
+            EventManager.fire(new ItemTooltipEvent(player, stack, lines));
         });
 
         UseBlockCallback.EVENT.register((player, world, hand, hitResult) -> {

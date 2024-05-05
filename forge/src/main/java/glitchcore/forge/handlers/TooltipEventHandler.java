@@ -15,6 +15,6 @@ public class TooltipEventHandler
     @SubscribeEvent
     public static void onItemTooltip(ItemTooltipEvent event)
     {
-        EventManager.fire(new glitchcore.event.client.ItemTooltipEvent(event.getItemStack(), event.getToolTip()));
+        EventManager.fire(new glitchcore.event.client.ItemTooltipEvent(event.getEntity(), event.getItemStack(), event.getToolTip()));
     }
 }
