@@ -19,10 +19,4 @@ public class GlitchCoreForge
     {
         GlitchCore.init();
     }
-
-    @Deprecated
-    public static void prepareModEventHandlers(IEventBus modEventBus)
-    {
-
-    }
 }
