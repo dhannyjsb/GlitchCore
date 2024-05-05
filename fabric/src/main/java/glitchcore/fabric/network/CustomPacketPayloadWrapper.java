@@ -29,11 +29,11 @@ public class CustomPacketPayloadWrapper<T extends CustomPacket<T>>
         if (packet.getPhase() == CustomPacket.Phase.PLAY)
         {
             PayloadTypeRegistry.playC2S().register(this.payloadType, CustomPacketPayload.codec(Impl::write, Impl::new));
-            ServerPlayNetworking.registerGlobalReceiver(this.payloadType, new ServerPlayNetworking.PlayPayloadHandler() {
+            ServerPlayNetworking.registerGlobalReceiver(this.payloadType, new ServerPlayNetworking.PlayPayloadHandler<Impl>() {
                 @Override
-                public void receive(CustomPacketPayload payload, ServerPlayNetworking.Context context)
+                public void receive(Impl payload, ServerPlayNetworking.Context context)
                 {
-                    CustomPacketPayloadWrapper.this.packet.handle(((Impl) packet).data, new CustomPacket.Context() {
+                    CustomPacketPayloadWrapper.this.packet.handle(payload.data, new CustomPacket.Context() {
                         @Override
                         public boolean isClientSide() {
                             return false;
@@ -50,12 +50,12 @@ public class CustomPacketPayloadWrapper<T extends CustomPacket<T>>
         else if (packet.getPhase() == CustomPacket.Phase.CONFIGURATION)
         {
             PayloadTypeRegistry.configurationC2S().register(this.payloadType, CustomPacketPayload.codec(Impl::write, Impl::new));
-            ServerConfigurationNetworking.registerGlobalReceiver(this.payloadType, new ServerConfigurationNetworking.ConfigurationPacketHandler()
+            ServerConfigurationNetworking.registerGlobalReceiver(this.payloadType, new ServerConfigurationNetworking.ConfigurationPacketHandler<Impl>()
             {
                 @Override
-                public void receive(CustomPacketPayload payload, ServerConfigurationNetworking.Context context)
+                public void receive(Impl payload, ServerConfigurationNetworking.Context context)
                 {
-                    CustomPacketPayloadWrapper.this.packet.handle(((Impl)packet).data, new CustomPacket.Context()
+                    CustomPacketPayloadWrapper.this.packet.handle(payload.data, new CustomPacket.Context()
                     {
                         @Override
                         public boolean isClientSide()

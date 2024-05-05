@@ -23,10 +23,10 @@ public class ClientCustomPacketPayloadWrapper<T extends CustomPacket<T>> extends
         if (packet.getPhase() == CustomPacket.Phase.PLAY)
         {
             PayloadTypeRegistry.playS2C().register(this.payloadType, CustomPacketPayload.codec(Impl::write, Impl::new));
-            ClientPlayNetworking.registerGlobalReceiver(this.payloadType, new ClientPlayNetworking.PlayPayloadHandler() {
+            ClientPlayNetworking.registerGlobalReceiver(this.payloadType, new ClientPlayNetworking.PlayPayloadHandler<Impl>() {
                 @Override
-                public void receive(CustomPacketPayload packet, ClientPlayNetworking.Context context) {
-                    ClientCustomPacketPayloadWrapper.this.packet.handle(((Impl) packet).data, new CustomPacket.Context() {
+                public void receive(Impl payload, ClientPlayNetworking.Context context) {
+                    ClientCustomPacketPayloadWrapper.this.packet.handle(payload.data, new CustomPacket.Context() {
                         @Override
                         public boolean isClientSide() {
                             return true;
@@ -43,10 +43,10 @@ public class ClientCustomPacketPayloadWrapper<T extends CustomPacket<T>> extends
         else if (packet.getPhase() == CustomPacket.Phase.CONFIGURATION)
         {
             PayloadTypeRegistry.configurationS2C().register(this.payloadType, CustomPacketPayload.codec(Impl::write, Impl::new));
-            ClientConfigurationNetworking.registerGlobalReceiver(this.payloadType, new ClientConfigurationNetworking.ConfigurationPayloadHandler() {
+            ClientConfigurationNetworking.registerGlobalReceiver(this.payloadType, new ClientConfigurationNetworking.ConfigurationPayloadHandler<Impl>() {
                 @Override
-                public void receive(CustomPacketPayload payload, ClientConfigurationNetworking.Context context) {
-                    ClientCustomPacketPayloadWrapper.this.packet.handle(((Impl) packet).data, new CustomPacket.Context() {
+                public void receive(Impl payload, ClientConfigurationNetworking.Context context) {
+                    ClientCustomPacketPayloadWrapper.this.packet.handle(payload.data, new CustomPacket.Context() {
                         @Override
                         public boolean isClientSide() {
                             return true;
