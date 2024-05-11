@@ -2,7 +2,7 @@
  * Copyright 2023, the Glitchfiend Team.
  * All rights reserved.
  ******************************************************************************/
-package glitchcore.fabric.mixin.client;
+package glitchcore.neoforge.mixin.client;
 
 import glitchcore.event.EventManager;
 import glitchcore.event.client.RenderGuiEvent;
@@ -33,13 +33,13 @@ public abstract class MixinGui
         EventManager.fire(new RenderGuiEvent.Pre(RenderGuiEvent.Type.FROSTBITE, (Gui)(Object)this, guiGraphics, this.partialTicks, guiGraphics.guiWidth(), guiGraphics.guiHeight()));
     }
 
-    @Inject(method="renderPlayerHealth", at=@At(value="INVOKE", target="net/minecraft/client/gui/Gui.getVehicleMaxHearts(Lnet/minecraft/world/entity/LivingEntity;)I"))
-    private void onRenderPlayerHealth(GuiGraphics guiGraphics, CallbackInfo ci)
+    @Inject(method="renderFoodLevel", at=@At(value="INVOKE", target="net/minecraft/client/gui/Gui.getVehicleMaxHearts(Lnet/minecraft/world/entity/LivingEntity;)I"))
+    private void onRenderFoodLevel(GuiGraphics guiGraphics, CallbackInfo ci)
     {
         EventManager.fire(new RenderGuiEvent.Pre(RenderGuiEvent.Type.FOOD, (Gui)(Object)this, guiGraphics, this.partialTicks, guiGraphics.guiWidth(), guiGraphics.guiHeight()));
     }
 
-    @ModifyVariable(method="renderPlayerHealth", at=@At(value="INVOKE", target="net/minecraft/world/entity/player/Player.getMaxAirSupply()I"), ordinal = 10, require = 1)
+    @ModifyVariable(method="renderAirLevel", at=@At(value="INVOKE", target="net/minecraft/world/entity/player/Player.getMaxAirSupply()I"), ordinal = 0, require = 1)
     private int onBeginRenderAir(int rightTop, GuiGraphics guiGraphics)
     {
         var event = new RenderGuiEvent.Pre(RenderGuiEvent.Type.AIR, (Gui)(Object)this, guiGraphics, this.partialTicks, guiGraphics.guiWidth(), guiGraphics.guiHeight(), rightTop + 10);

@@ -2,7 +2,7 @@
  * Copyright 2023, the Glitchfiend Team.
  * All rights reserved.
  ******************************************************************************/
-package glitchcore.fabric.mixin.client;
+package glitchcore.forge.mixin.client;
 
 import glitchcore.event.EventManager;
 import glitchcore.event.client.RenderGuiEvent;

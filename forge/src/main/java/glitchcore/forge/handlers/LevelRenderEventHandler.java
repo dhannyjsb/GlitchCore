@@ -4,8 +4,11 @@
  ******************************************************************************/
 package glitchcore.forge.handlers;
 
+import com.mojang.blaze3d.vertex.PoseStack;
 import glitchcore.event.EventManager;
 import glitchcore.event.client.LevelRenderEvent;
+import glitchcore.forge.renderer.IExtendedDebugRenderer;
+import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -27,7 +30,7 @@ public class LevelRenderEventHandler
 
     private static void fireStage(LevelRenderEvent.Stage stage, RenderLevelStageEvent event)
     {
-        // TODO: Use mixins to get the posestack
-        // EventManager.fire(new LevelRenderEvent(stage, event.getLevelRenderer(), event.getPoseStack(), event.getProjectionMatrix(), event.getRenderTick(), event.getPartialTick(), event.getCamera(), event.getFrustum()));
+        PoseStack poseStack = ((IExtendedDebugRenderer)Minecraft.getInstance().debugRenderer).getLastPoseStack();
+        EventManager.fire(new LevelRenderEvent(stage, event.getLevelRenderer(), poseStack, event.getProjectionMatrix(), event.getRenderTick(), event.getPartialTick(), event.getCamera(), event.getFrustum()));
     }
 }

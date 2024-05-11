@@ -11,6 +11,7 @@
     "impl.MixinRenderHelper"
   ],
   "client": [
+    "client.MixinGui",
     "client.MixinGuiGraphics"
   ],
   "injectors": {
