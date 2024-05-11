@@ -7,33 +7,34 @@ package glitchcore.fabric.network;
 import glitchcore.network.CustomPacket;
 import net.fabricmc.fabric.api.networking.v1.*;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.PacketType;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Optional;
 
-public class CustomPacketPayloadWrapper<T extends CustomPacket<T>>
+public class GCPayloadFactory<T extends CustomPacket<T>>
 {
-    protected final ResourceLocation channel;
+    protected final CustomPacketPayload.Type<Impl> type;
     protected final CustomPacket<T> packet;
-    protected final CustomPacketPayload.Type<Impl> payloadType;
+    private final StreamCodec<? super FriendlyByteBuf, Impl> codec;
 
-    public CustomPacketPayloadWrapper(ResourceLocation channel, CustomPacket<T> packet)
+    public GCPayloadFactory(ResourceLocation name, CustomPacket<T> packet)
     {
-        this.channel = channel;
+        this.type = CustomPacketPayload.createType(name.toString());
         this.packet = packet;
-        this.payloadType = CustomPacketPayload.createType(channel.toString());
+        this.codec = CustomPacketPayload.codec(Impl::write, Impl::new);
 
         if (packet.getPhase() == CustomPacket.Phase.PLAY)
         {
-            PayloadTypeRegistry.playC2S().register(this.payloadType, CustomPacketPayload.codec(Impl::write, Impl::new));
-            ServerPlayNetworking.registerGlobalReceiver(this.payloadType, new ServerPlayNetworking.PlayPayloadHandler<Impl>() {
+            PayloadTypeRegistry.playC2S().register(this.type, this.codec);
+            PayloadTypeRegistry.playS2C().register(this.type, this.codec);
+            ServerPlayNetworking.registerGlobalReceiver(this.type, new ServerPlayNetworking.PlayPayloadHandler<Impl>() {
                 @Override
                 public void receive(Impl payload, ServerPlayNetworking.Context context)
                 {
-                    CustomPacketPayloadWrapper.this.packet.handle(payload.data, new CustomPacket.Context() {
+                    GCPayloadFactory.this.packet.handle(payload.data, new CustomPacket.Context() {
                         @Override
                         public boolean isClientSide() {
                             return false;
@@ -49,13 +50,14 @@ public class CustomPacketPayloadWrapper<T extends CustomPacket<T>>
         }
         else if (packet.getPhase() == CustomPacket.Phase.CONFIGURATION)
         {
-            PayloadTypeRegistry.configurationC2S().register(this.payloadType, CustomPacketPayload.codec(Impl::write, Impl::new));
-            ServerConfigurationNetworking.registerGlobalReceiver(this.payloadType, new ServerConfigurationNetworking.ConfigurationPacketHandler<Impl>()
+            PayloadTypeRegistry.configurationC2S().register(this.type, this.codec);
+            PayloadTypeRegistry.configurationS2C().register(this.type, this.codec);
+            ServerConfigurationNetworking.registerGlobalReceiver(this.type, new ServerConfigurationNetworking.ConfigurationPacketHandler<Impl>()
             {
                 @Override
                 public void receive(Impl payload, ServerConfigurationNetworking.Context context)
                 {
-                    CustomPacketPayloadWrapper.this.packet.handle(payload.data, new CustomPacket.Context()
+                    GCPayloadFactory.this.packet.handle(payload.data, new CustomPacket.Context()
                     {
                         @Override
                         public boolean isClientSide()
@@ -74,12 +76,12 @@ public class CustomPacketPayloadWrapper<T extends CustomPacket<T>>
         }
     }
 
-    public CustomPacketPayload createPacket(T data)
+    public CustomPacketPayload createPayload(T data)
     {
         return new Impl(data);
     }
 
-    protected class Impl implements CustomPacketPayload
+    public class Impl implements CustomPacketPayload
     {
         protected final T data;
 
@@ -90,7 +92,7 @@ public class CustomPacketPayloadWrapper<T extends CustomPacket<T>>
 
         Impl(FriendlyByteBuf buf)
         {
-            this.data = CustomPacketPayloadWrapper.this.packet.decode(buf);
+            this.data = GCPayloadFactory.this.packet.decode(buf);
         }
 
         public void write(FriendlyByteBuf buf)
@@ -100,7 +102,7 @@ public class CustomPacketPayloadWrapper<T extends CustomPacket<T>>
 
         @Override
         public Type<? extends CustomPacketPayload> type() {
-            return CustomPacketPayloadWrapper.this.payloadType;
+            return GCPayloadFactory.this.type;
         }
     }
 }

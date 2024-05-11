@@ -6,9 +6,9 @@ import net.minecraft.resources.ResourceLocation;
 
 public interface ICustomPayloadPacketHandler
 {
-    default CustomPacketPayloadWrapper<?> createPacketWrapper(ResourceLocation channel, CustomPacket<?> packet)
+    default GCPayloadFactory<?> createPayloadFactory(ResourceLocation channel, CustomPacket<?> packet)
     {
-        return new CustomPacketPayloadWrapper<>(channel, packet);
+        return new GCPayloadFactory<>(channel, packet);
     }
 
     <T extends CustomPacket<T>> CustomPacketPayload createCustomPacketPayload(T packet);

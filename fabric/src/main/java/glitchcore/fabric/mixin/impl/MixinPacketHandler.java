@@ -4,7 +4,7 @@
  ******************************************************************************/
 package glitchcore.fabric.mixin.impl;
 
-import glitchcore.fabric.network.CustomPacketPayloadWrapper;
+import glitchcore.fabric.network.GCPayloadFactory;
 import glitchcore.fabric.network.ICustomPayloadPacketHandler;
 import glitchcore.network.CustomPacket;
 import glitchcore.network.PacketHandler;
@@ -30,13 +30,13 @@ public abstract class MixinPacketHandler implements ICustomPayloadPacketHandler
     private ResourceLocation channelName;
 
     @Unique
-    private Map<Class<?>, CustomPacketPayloadWrapper> wrappers = new HashMap<>();
+    private Map<Class<?>, GCPayloadFactory> factories = new HashMap<>();
 
 
     @Overwrite
     public <T extends CustomPacket<T>> void register(ResourceLocation name, CustomPacket<T> packet)
     {
-        wrappers.put(getPacketDataType(packet), createPacketWrapper(name, packet));
+        factories.put(getPacketDataType(packet), createPayloadFactory(name, packet));
     }
 
     @Overwrite
@@ -88,10 +88,10 @@ public abstract class MixinPacketHandler implements ICustomPayloadPacketHandler
     {
         var dataType = getPacketDataType(packet);
 
-        if (!this.wrappers.containsKey(dataType))
+        if (!this.factories.containsKey(dataType))
             throw new RuntimeException("Unregistered packet of type " + dataType);
 
-        return this.wrappers.get(dataType).createPacket(packet);
+        return this.factories.get(dataType).createPayload(packet);
     }
 
     private static <T extends CustomPacket<T>> Class<?> getPacketDataType(CustomPacket<T> packet)

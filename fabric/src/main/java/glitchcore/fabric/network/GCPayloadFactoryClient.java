@@ -7,26 +7,23 @@ package glitchcore.fabric.network;
 import glitchcore.network.CustomPacket;
 import net.fabricmc.fabric.api.client.networking.v1.ClientConfigurationNetworking;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayNetworking;
-import net.fabricmc.fabric.api.networking.v1.PayloadTypeRegistry;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 
 import java.util.Optional;
 
-public class ClientCustomPacketPayloadWrapper<T extends CustomPacket<T>> extends CustomPacketPayloadWrapper<T>
+public class GCPayloadFactoryClient<T extends CustomPacket<T>> extends GCPayloadFactory<T>
 {
-    public ClientCustomPacketPayloadWrapper(ResourceLocation channel, CustomPacket<T> packet)
+    public GCPayloadFactoryClient(ResourceLocation channel, CustomPacket<T> packet)
     {
         super(channel, packet);
 
         if (packet.getPhase() == CustomPacket.Phase.PLAY)
         {
-            PayloadTypeRegistry.playS2C().register(this.payloadType, CustomPacketPayload.codec(Impl::write, Impl::new));
-            ClientPlayNetworking.registerGlobalReceiver(this.payloadType, new ClientPlayNetworking.PlayPayloadHandler<Impl>() {
+            ClientPlayNetworking.registerGlobalReceiver(this.type, new ClientPlayNetworking.PlayPayloadHandler<Impl>() {
                 @Override
                 public void receive(Impl payload, ClientPlayNetworking.Context context) {
-                    ClientCustomPacketPayloadWrapper.this.packet.handle(payload.data, new CustomPacket.Context() {
+                    GCPayloadFactoryClient.this.packet.handle(payload.data, new CustomPacket.Context() {
                         @Override
                         public boolean isClientSide() {
                             return true;
@@ -42,11 +39,10 @@ public class ClientCustomPacketPayloadWrapper<T extends CustomPacket<T>> extends
         }
         else if (packet.getPhase() == CustomPacket.Phase.CONFIGURATION)
         {
-            PayloadTypeRegistry.configurationS2C().register(this.payloadType, CustomPacketPayload.codec(Impl::write, Impl::new));
-            ClientConfigurationNetworking.registerGlobalReceiver(this.payloadType, new ClientConfigurationNetworking.ConfigurationPayloadHandler<Impl>() {
+            ClientConfigurationNetworking.registerGlobalReceiver(this.type, new ClientConfigurationNetworking.ConfigurationPayloadHandler<Impl>() {
                 @Override
                 public void receive(Impl payload, ClientConfigurationNetworking.Context context) {
-                    ClientCustomPacketPayloadWrapper.this.packet.handle(payload.data, new CustomPacket.Context() {
+                    GCPayloadFactoryClient.this.packet.handle(payload.data, new CustomPacket.Context() {
                         @Override
                         public boolean isClientSide() {
                             return true;

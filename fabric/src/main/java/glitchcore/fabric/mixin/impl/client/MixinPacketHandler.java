@@ -4,8 +4,8 @@
  ******************************************************************************/
 package glitchcore.fabric.mixin.impl.client;
 
-import glitchcore.fabric.network.ClientCustomPacketPayloadWrapper;
-import glitchcore.fabric.network.CustomPacketPayloadWrapper;
+import glitchcore.fabric.network.GCPayloadFactoryClient;
+import glitchcore.fabric.network.GCPayloadFactory;
 import glitchcore.fabric.network.ICustomPayloadPacketHandler;
 import glitchcore.network.CustomPacket;
 import glitchcore.network.PacketHandler;
@@ -30,8 +30,8 @@ public abstract class MixinPacketHandler implements ICustomPayloadPacketHandler
     }
 
     @Override
-    public CustomPacketPayloadWrapper<?> createPacketWrapper(ResourceLocation channel, CustomPacket<?> packet)
+    public GCPayloadFactory<?> createPayloadFactory(ResourceLocation channel, CustomPacket<?> packet)
     {
-        return new ClientCustomPacketPayloadWrapper<>(channel, packet);
+        return new GCPayloadFactoryClient<>(channel, packet);
     }
 }
