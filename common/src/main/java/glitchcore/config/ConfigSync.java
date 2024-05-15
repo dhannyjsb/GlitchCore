@@ -42,13 +42,11 @@ public class ConfigSync
     {
         Path path = Paths.get(pathString);
         String normalizedPath = path.toString();
-
         var config = configs.get(normalizedPath);
-        if (config != null) {
-            config.parse(toml);
-            config.load();
-        } else {
-            System.err.println("GlitchCore sync config not found for: " + normalizedPath);
+        if (config == null) {
+            throw new NullPointerException("GlitchCore Config path is null for: " + normalizedPath);
         }
+        config.parse(toml);
+        config.load();
     }
 }
