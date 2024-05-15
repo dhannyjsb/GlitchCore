@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Stream;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class ConfigSync
 {
@@ -20,6 +22,7 @@ public class ConfigSync
     {
         String relative = Environment.getConfigPath().relativize(config.getPath()).toString();
         configs.put(relative, config);
+
     }
 
     public static Stream<SyncConfigPacket> createPackets()
@@ -35,10 +38,17 @@ public class ConfigSync
         });
     }
 
-    public static void reload(String path, String toml)
+    public static void reload(String pathString, String toml)
     {
-        var config = configs.get(path);
-        config.parse(toml);
-        config.load();
+        Path path = Paths.get(pathString);
+        String normalizedPath = path.toString();
+
+        var config = configs.get(normalizedPath);
+        if (config != null) {
+            config.parse(toml);
+            config.load();
+        } else {
+            System.err.println("GlitchCore sync config not found for: " + normalizedPath);
+        }
     }
 }
